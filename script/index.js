@@ -17,6 +17,7 @@ const nulo = 0;
 const tempoVirada=1000;
 const tempoResultado=200;
 const tempoSegundo=1000;
+const randomizer = 0.5;
 
 function inicio(){
     qtdCartas = Number(prompt("Com quantas cartas quer jogar?"));
@@ -42,13 +43,13 @@ function inicio(){
 }
 
 function inserirCartas() {
-    cartas.sort(()=> Math.random() - 0.5);
+    cartas.sort(()=> Math.random() - randomizer);
     
     if (qtdCartas < max) {
-        cartas.splice(qtdCartas/2 - 1, (14 - qtdCartas)/2);
+        cartas.splice(qtdCartas/2 - 1, (max - qtdCartas)/2);
     }
     cartas.push(...cartas);
-    cartas.sort(()=> Math.random() - 0.5);
+    cartas.sort(()=> Math.random() - randomizer);
 
     let divCartas="";
     for (let i = 0; i < cartas.length; i++) {
