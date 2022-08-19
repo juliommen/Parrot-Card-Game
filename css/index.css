@@ -18,7 +18,7 @@ body {
 }
 
 h1{
-  position: fixed;
+  position: absolute;
   top:10%;
   font-weight: bold;
   width: 100vw;
@@ -57,6 +57,18 @@ h1{
 .carta img {
   width: 100px;
   height: 100px; 
+}
+
+.no-display {
+  display:none;
+}
+
+.tempo {
+  position: absolute;
+  top:10px;
+  left: 10px;
+  text-align: start;
+  font-size: 24px;
 }
 
 @media (max-width:350px) {

@@ -1,82 +1,128 @@
-let prato;
-let preco_prato;
-let bebida;
-let preco_bebida;
-let sobremesa;
-let preco_sobremesa;
-let total;
-let ativos=0;
+let qtdCartas="";
+let cartas = [1,2,3,4,5,6,7];
+let baralho = document.querySelector(".cartas");
+let cartasViradas =0;
+let contagemTotal=0;
+let primeiraSelecionada=-1;
+let posicaoPrimeiraSelecionada=-1;
+let acertos=0;
+let tempo=0;
+let idInterval="";
 
-function addOnClickListener(){
-    const itens = document.getElementsByClassName("item");
-    for (let i = 0; i < itens.length; i++) {
-        itens[i].addEventListener("click", function() {
-            let classes = this.classList;
-            let itens_filtrados;
-            if (classes.contains("p")){
-                ativos++;
-                prato=this.querySelector("h1").innerText;
-                preco_prato=this.querySelector("p").innerText.split("R$")[1].replace(",",".");
-                itens_filtrados = document.getElementsByClassName("p");
-                for (let j = 0; j < itens_filtrados.length; j++) {
-                    itens_filtrados[j].classList.remove("ativo");   
-                }
-            } else if (classes.contains("b")) {
-                ativos++;
-                bebida=this.querySelector("h1").innerText;
-                preco_bebida=this.querySelector("p").innerText.split("R$")[1].replace(",",".");
-                itens_filtrados = document.getElementsByClassName("b");
-                for (let j = 0; j < itens_filtrados.length; j++) {
-                    itens_filtrados[j].classList.remove("ativo");   
-                }
-            } else {
-                ativos++;
-                sobremesa=this.querySelector("h1").innerText;
-                preco_sobremesa=this.querySelector("p").innerText.split("R$")[1].replace(",",".");
-                itens_filtrados = document.getElementsByClassName("s");
-                for (let j = 0; j < itens_filtrados.length; j++) {
-                    itens_filtrados[j].classList.remove("ativo");   
-                }
-            }
-            classes.add("ativo");
-            if (ativos >=3) {
-                const fechamento = document.querySelector(".fechamento");
-                fechamento.classList.add("finalizar");
-                fechamento.innerHTML = "Fechar pedido";
-                total = ("R$ "+(Number(preco_bebida)+Number(preco_prato)+Number(preco_sobremesa)).toFixed(2)).replace(".",",");
-            }
-        });
-        
+function inicio(){
+    qtdCartas = Number(prompt("Com quantas cartas quer jogar?"));
+    if (isNaN(qtdCartas)) {
+        alert("Por favor, insira um número. Letras não são permitidas.");
+        inicio();
+        return;
+    } else if (qtdCartas == 0){
+        alert("Por favor, insira um número maior que zero.");
+        inicio();
+        return;
+    } else if (qtdCartas % 2 == 1) {
+        alert("Por favor, insira um número par.");
+        inicio();
+        return;
+    } else if (qtdCartas < 4 || qtdCartas > 14) {
+        alert("Por favor, insira um número entre 4 e 14.");
+        inicio();
+        return;
+    } 
+    inserirCartas(); 
+    runClock();
+
+}
+
+inicio();
+
+function inserirCartas() {
+
+    cartas.sort(()=> Math.random() - 0.5);
+    if (qtdCartas < 14) {
+        cartas.splice(qtdCartas/2 - 1, (14 - qtdCartas)/2);
+    }
+    cartas.push(...cartas);
+    cartas.sort(()=> Math.random() - 0.5);
+
+    let divCartas="";
+    for (let i = 0; i < cartas.length; i++) {
+        divCartas += 
+                `<div class='carta' id='${i}' onclick='virar(this.id)'>
+                    <img alt="carta fechada" class='front' id='${i}-front' src='./assets/front.png'/>
+                    <img alt="carta aberta" class='back no-display' id='${i}-back' src='./assets/${cartas[i]}.gif'/>
+                </div>`
+    }
+
+    baralho.innerHTML=divCartas;
+}
+
+function virar(i){
+
+    const imgFront = document.getElementById(i+"-front");
+    if ( imgFront.classList.contains("no-display")) {
+        alert("Não é possível desvirar esta carta. Selecione uma carta fechada para continuar.");
+        return;
+    } 
+
+    contagemTotal++;
+    imgFront.classList.add("no-display");
+    
+    const imgBack = document.getElementById(i+"-back");
+    imgBack.classList.remove("no-display");
+
+    
+    cartasViradas++;
+    if (cartasViradas == 2) {
+        cartasViradas=0;
+        if (cartas[i] != primeiraSelecionada) {  
+            setTimeout( () => {
+                imgFront.classList.remove("no-display"); 
+                imgBack.classList.add("no-display");
+                document.getElementById(posicaoPrimeiraSelecionada+"-back").classList.add("no-display");
+                document.getElementById(posicaoPrimeiraSelecionada+"-front").classList.remove("no-display");
+            },1000)
+        } else {
+            acertos++;
+        }
+    } else {
+        primeiraSelecionada=cartas[i];
+        posicaoPrimeiraSelecionada = i;
+    }
+
+    if (acertos == cartas.length/2){
+        clearInterval(idInterval);
+        setTimeout(() => {
+            alert(`Você ganhou em ${contagemTotal} jogadas, levando ${tempo} segundos!`);
+            recomecar();
+        }, 500);
+
     }
 }
 
-
-function cancelar(){
-    document.querySelector(".master-revisao").style.display="none";
+function runClock(){
+    idInterval = setInterval(() => {
+        tempo++;
+        document.querySelector(".tempo").innerText = "Temporizador: " + tempo + " segundos";
+    },1000)
 }
 
-function revisarPedido(){
-    document.getElementById("bebida").innerText = bebida;
-    document.getElementById("preco_bebida").innerText = preco_bebida.replace(".",",");
-    document.getElementById("prato").innerText = prato;
-    document.getElementById("preco_prato").innerText = preco_prato.replace(".",",");
-    document.getElementById("sobremesa").innerText = sobremesa;
-    document.getElementById("preco_sobremesa").innerText = preco_sobremesa.replace(".",",");
-    document.getElementById("preco_total").innerText = total;
-    document.querySelector(".master-revisao").style.display="flex";
-}
-
-function finalizarPedido(){
-    if (ativos >= 3){
-        let url = "https://wa.me/5567999961300?text=";
-        let msg = `Olá, gostaria de fazer o pedido:\n- Prato: ${prato}\n- Bebida: ${bebida}\n- Sobremesa: ${sobremesa}\nTotal: ${total}`
-        
-        nome = prompt("Qual o seu nome?");
-        endereço = prompt("Enviar o pedido para qual endereço?");
-
-        msg +=`\n\nNome: ${nome}\nEndereço: ${endereço}`;
-        let msg_encoded = encodeURIComponent(msg);
-        url+=msg_encoded;
-        window.open(url);
+function recomecar (){
+    const resposta = prompt("Deseja jogar novamente? Responda com 'sim' ou 'não'.")
+    if (resposta == "sim") {
+        qtdCartas="";
+        cartas = [1,2,3,4,5,6,7];
+        cartasViradas =0;
+        contagemTotal=0;
+        primeiraSelecionada=-1;
+        posicaoPrimeiraSelecionada=-1;
+        acertos=0;
+        tempo=0;
+        idInterval="";
+        document.querySelector(".tempo").innerText = "Temporizador: " + tempo + " segundos";
+        inicio();
+    } else if (resposta == "não") {
+        return;
+    } else {
+        recomecar();
     }
 }
