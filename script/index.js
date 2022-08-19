@@ -1,14 +1,19 @@
-let qtdCartas="";
+const baralho = document.querySelector(".cartas");
+let qtdCartas = "";
 let cartas = [1,2,3,4,5,6,7];
-let baralho = document.querySelector(".cartas");
-let cartasViradas =0;
-let contagemTotal=0;
-let primeiraSelecionada=-1;
-let posicaoPrimeiraSelecionada=-1;
-let acertos=0;
-let tempo=0;
-let idInterval="";
+let cartasViradas = 0;
+let contagemTotal = 0;
+let primeiraSelecionada = -1;
+let posicaoPrimeiraSelecionada = -1;
+let acertos = 0;
+let tempo = 0;
+let idInterval = "";
 let cartasViradasAoMesmoTempo = 0;
+const maxCartasViradas = 2;
+const max = 14;
+const min = 4;
+const resto = 1;
+const nulo = 0;
 
 function inicio(){
     qtdCartas = Number(prompt("Com quantas cartas quer jogar?"));
@@ -16,26 +21,27 @@ function inicio(){
         alert("Por favor, insira um número. Letras não são permitidas.");
         inicio();
         return;
-    } else if (qtdCartas == 0){
+    } else if (qtdCartas == nulo){
         alert("Por favor, insira um número maior que zero.");
         inicio();
         return;
-    } else if (qtdCartas % 2 == 1) {
+    } else if (qtdCartas % 2 == resto) {
         alert("Por favor, insira um número par.");
         inicio();
         return;
-    } else if (qtdCartas < 4 || qtdCartas > 14) {
+    } else if (qtdCartas < min || qtdCartas > max) {
         alert("Por favor, insira um número entre 4 e 14.");
         inicio();
         return;
-    } 
-    inserirCartas(); 
+    }
+    inserirCartas();
     runClock();
 }
 
 function inserirCartas() {
     cartas.sort(()=> Math.random() - 0.5);
-    if (qtdCartas < 14) {
+    
+    if (qtdCartas < max) {
         cartas.splice(qtdCartas/2 - 1, (14 - qtdCartas)/2);
     }
     cartas.push(...cartas);
@@ -43,41 +49,26 @@ function inserirCartas() {
 
     let divCartas="";
     for (let i = 0; i < cartas.length; i++) {
-        divCartas += 
-                `
-                    <div 
-                        class='carta' 
-                        id='${i}' 
-                        onclick='virar(this.id)'
-                    >
-                        <img 
-                            alt="carta fechada" 
-                            class='front' 
-                            id='${i}-front' 
-                            src='./assets/front.png'
-                        />
-                        <img 
-                            alt="carta aberta" 
-                            class='back no-display' 
-                            id='${i}-back' 
-                            src='./assets/${cartas[i]}.gif'
-                        />
-                    </div>
-                `
+        divCartas +=`
+                <div class='carta' id='${i}' onclick='virar(this.id)'>
+                    <img alt='carta fechada' class='front' id='${i}-front' src='./assets/front.png'>
+                    <img alt='carta aberta' class='back no-display' id='${i}-back' src='./assets/${cartas[i]}.gif'>
+                </div>
+            `;
     }
-    baralho.innerHTML=divCartas;
+    baralho.innerHTML = divCartas;
 }
 
 function virar(i){
     /*não se pode virar mais de duas por vez*/
-    if (cartasViradasAoMesmoTempo < 2) {
+    if (cartasViradasAoMesmoTempo < maxCartasViradas) {
         cartasViradasAoMesmoTempo++;
         
         const imgFront = document.getElementById(i+"-front");
         if ( imgFront.classList.contains("no-display")) {
             alert(`Não é possível desvirar esta carta. Selecione uma carta fechada para continuar.`);
             return;
-        } 
+        }
 
         contagemTotal++;
         imgFront.classList.add("no-display");
@@ -88,11 +79,11 @@ function virar(i){
         document.getElementById(i).classList.add("rotate");
 
         cartasViradas++;
-        if (cartasViradas == 2) {
-            cartasViradas=0;
-            if (cartas[i] != primeiraSelecionada) {  
+        if (cartasViradas == maxCartasViradas) {
+            cartasViradas = 0;
+            if (cartas[i] != primeiraSelecionada) {
                 setTimeout( () => {
-                    imgFront.classList.remove("no-display"); 
+                    imgFront.classList.remove("no-display");
                     imgBack.classList.add("no-display");
 
                     document.getElementById(posicaoPrimeiraSelecionada+"-back")
@@ -102,7 +93,7 @@ function virar(i){
                             .classList
                             .remove("no-display");
                     cartasViradasAoMesmoTempo=0;
-                },1000)
+                },1000);
             } else {
                 acertos++;
                 cartasViradasAoMesmoTempo=0;
@@ -110,7 +101,7 @@ function virar(i){
         } else  {
             primeiraSelecionada=cartas[i];
             posicaoPrimeiraSelecionada = i;
-        } 
+        }
 
         if (acertos == cartas.length/2){
             clearInterval(idInterval);
@@ -127,26 +118,28 @@ function runClock(){
         tempo++;
         document.querySelector(".tempo")
                 .innerText = "Temporizador: " + tempo + " segundos";
-    },1000)
+    },1000);
 }
 
 function recomecar (){
-    const resposta = prompt("Deseja jogar novamente? Responda com 'sim' ou 'não'.")
-    if (resposta == "sim") {
-        qtdCartas="";
+    const afirmativa = "sim";
+    const negativa = "não";
+    const resposta = prompt("Deseja jogar novamente? Responda com 'sim' ou 'não'.");
+    if (resposta == afirmativa) {
+        qtdCartas = "";
         cartas = [1,2,3,4,5,6,7];
-        cartasViradas =0;
-        contagemTotal=0;
-        primeiraSelecionada=-1;
-        posicaoPrimeiraSelecionada=-1;
-        acertos=0;
-        tempo=0;
-        idInterval="";
+        cartasViradas = 0;
+        contagemTotal = 0;
+        primeiraSelecionada = -1;
+        posicaoPrimeiraSelecionada = -1;
+        acertos = 0;
+        tempo = 0;
+        idInterval = "";
         cartasViradasAoMesmoTempo = 0;
         document.querySelector(".tempo")
                 .innerText = "Temporizador: " + tempo + " segundos";
         inicio();
-    } else if (resposta == "não") {
+    } else if (resposta == negativa) {
         return;
     } else {
         recomecar();
