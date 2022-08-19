@@ -14,6 +14,9 @@ const max = 14;
 const min = 4;
 const resto = 1;
 const nulo = 0;
+const tempoVirada=1000;
+const tempoResultado=200;
+const tempoSegundo=1000;
 
 function inicio(){
     qtdCartas = Number(prompt("Com quantas cartas quer jogar?"));
@@ -93,7 +96,7 @@ function virar(i){
                             .classList
                             .remove("no-display");
                     cartasViradasAoMesmoTempo=0;
-                },1000);
+                },tempoVirada);
             } else {
                 acertos++;
                 cartasViradasAoMesmoTempo=0;
@@ -108,7 +111,7 @@ function virar(i){
             setTimeout(() => {
                 alert(`Você ganhou em ${contagemTotal} jogadas, levando ${tempo} segundos!`);
                 recomecar();
-            }, 100);
+            }, tempoResultado);
         }
     }
 }
@@ -118,7 +121,7 @@ function runClock(){
         tempo++;
         document.querySelector(".tempo")
                 .innerText = "Temporizador: " + tempo + " segundos";
-    },1000);
+    },tempoSegundo);
 }
 
 function recomecar (){
