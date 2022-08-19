@@ -50,7 +50,6 @@ function addOnClickListener(){
     }
 }
 
-addOnClickListener();
 
 function cancelar(){
     document.querySelector(".master-revisao").style.display="none";
