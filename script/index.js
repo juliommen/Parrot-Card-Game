@@ -8,6 +8,7 @@ let posicaoPrimeiraSelecionada=-1;
 let acertos=0;
 let tempo=0;
 let idInterval="";
+let cartasViradasAoMesmoTempo = 0;
 
 function inicio(){
     qtdCartas = Number(prompt("Com quantas cartas quer jogar?"));
@@ -30,13 +31,9 @@ function inicio(){
     } 
     inserirCartas(); 
     runClock();
-
 }
 
-inicio();
-
 function inserirCartas() {
-
     cartas.sort(()=> Math.random() - 0.5);
     if (qtdCartas < 14) {
         cartas.splice(qtdCartas/2 - 1, (14 - qtdCartas)/2);
@@ -47,62 +44,89 @@ function inserirCartas() {
     let divCartas="";
     for (let i = 0; i < cartas.length; i++) {
         divCartas += 
-                `<div class='carta' id='${i}' onclick='virar(this.id)'>
-                    <img alt="carta fechada" class='front' id='${i}-front' src='./assets/front.png'/>
-                    <img alt="carta aberta" class='back no-display' id='${i}-back' src='./assets/${cartas[i]}.gif'/>
-                </div>`
+                `
+                    <div 
+                        class='carta' 
+                        id='${i}' 
+                        onclick='virar(this.id)'
+                    >
+                        <img 
+                            alt="carta fechada" 
+                            class='front' 
+                            id='${i}-front' 
+                            src='./assets/front.png'
+                        />
+                        <img 
+                            alt="carta aberta" 
+                            class='back no-display' 
+                            id='${i}-back' 
+                            src='./assets/${cartas[i]}.gif'
+                        />
+                    </div>
+                `
     }
-
     baralho.innerHTML=divCartas;
 }
 
 function virar(i){
+    /*não se pode virar mais de duas por vez*/
+    if (cartasViradasAoMesmoTempo < 2) {
+        cartasViradasAoMesmoTempo++;
+        
+        const imgFront = document.getElementById(i+"-front");
+        if ( imgFront.classList.contains("no-display")) {
+            alert(`Não é possível desvirar esta carta. Selecione uma carta fechada para continuar.`);
+            return;
+        } 
 
-    const imgFront = document.getElementById(i+"-front");
-    if ( imgFront.classList.contains("no-display")) {
-        alert("Não é possível desvirar esta carta. Selecione uma carta fechada para continuar.");
-        return;
-    } 
+        contagemTotal++;
+        imgFront.classList.add("no-display");
+        
+        const imgBack = document.getElementById(i+"-back");
+        imgBack.classList.remove("no-display");
 
-    contagemTotal++;
-    imgFront.classList.add("no-display");
-    
-    const imgBack = document.getElementById(i+"-back");
-    imgBack.classList.remove("no-display");
+        document.getElementById(i).classList.add("rotate");
 
-    
-    cartasViradas++;
-    if (cartasViradas == 2) {
-        cartasViradas=0;
-        if (cartas[i] != primeiraSelecionada) {  
-            setTimeout( () => {
-                imgFront.classList.remove("no-display"); 
-                imgBack.classList.add("no-display");
-                document.getElementById(posicaoPrimeiraSelecionada+"-back").classList.add("no-display");
-                document.getElementById(posicaoPrimeiraSelecionada+"-front").classList.remove("no-display");
-            },1000)
-        } else {
-            acertos++;
+        cartasViradas++;
+        if (cartasViradas == 2) {
+            cartasViradas=0;
+            if (cartas[i] != primeiraSelecionada) {  
+                setTimeout( () => {
+                    imgFront.classList.remove("no-display"); 
+                    imgBack.classList.add("no-display");
+
+                    document.getElementById(posicaoPrimeiraSelecionada+"-back")
+                            .classList
+                            .add("no-display");
+                    document.getElementById(posicaoPrimeiraSelecionada+"-front")
+                            .classList
+                            .remove("no-display");
+                    cartasViradasAoMesmoTempo=0;
+                },1000)
+            } else {
+                acertos++;
+                cartasViradasAoMesmoTempo=0;
+            }
+        } else  {
+            primeiraSelecionada=cartas[i];
+            posicaoPrimeiraSelecionada = i;
+        } 
+
+        if (acertos == cartas.length/2){
+            clearInterval(idInterval);
+            setTimeout(() => {
+                alert(`Você ganhou em ${contagemTotal} jogadas, levando ${tempo} segundos!`);
+                recomecar();
+            }, 100);
         }
-    } else {
-        primeiraSelecionada=cartas[i];
-        posicaoPrimeiraSelecionada = i;
-    }
-
-    if (acertos == cartas.length/2){
-        clearInterval(idInterval);
-        setTimeout(() => {
-            alert(`Você ganhou em ${contagemTotal} jogadas, levando ${tempo} segundos!`);
-            recomecar();
-        }, 500);
-
     }
 }
 
 function runClock(){
     idInterval = setInterval(() => {
         tempo++;
-        document.querySelector(".tempo").innerText = "Temporizador: " + tempo + " segundos";
+        document.querySelector(".tempo")
+                .innerText = "Temporizador: " + tempo + " segundos";
     },1000)
 }
 
@@ -118,7 +142,9 @@ function recomecar (){
         acertos=0;
         tempo=0;
         idInterval="";
-        document.querySelector(".tempo").innerText = "Temporizador: " + tempo + " segundos";
+        cartasViradasAoMesmoTempo = 0;
+        document.querySelector(".tempo")
+                .innerText = "Temporizador: " + tempo + " segundos";
         inicio();
     } else if (resposta == "não") {
         return;
@@ -126,3 +152,5 @@ function recomecar (){
         recomecar();
     }
 }
+
+inicio();
